@@ -37,26 +37,26 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        if (VERBOSE) Log.v(TAG, "+++ ON START +++")
+        Log.v(TAG, "+++ ON START +++")
     }
 
     override fun onResume() {
         super.onResume()
-        if (VERBOSE) Log.v(TAG, "+++ ON RESUME +++")
+        Log.v(TAG, "+++ ON RESUME +++")
     }
 
     override fun onPause() {
         super.onPause()
-        if (VERBOSE) Log.v(TAG, "+++ ON PAUSE +++")
+        Log.v(TAG, "+++ ON PAUSE +++")
     }
 
     override fun onStop() {
         super.onStop()
-        if (VERBOSE) Log.v(TAG, "+++ ON STOP +++")
+        Log.v(TAG, "+++ ON STOP +++")
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        if (VERBOSE) Log.v(TAG, "+++ ON DESTROY +++")
+        Log.v(TAG, "+++ ON DESTROY +++")
     }
 }
