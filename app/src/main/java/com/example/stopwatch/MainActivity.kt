@@ -29,6 +29,14 @@ class MainActivity : AppCompatActivity() {
     var pausedTime = 0.0
     var isRunning = false
     var isPaused = false
+    val destructTimer = object  :CountDownTimer (100000000, 100) {
+        override fun onTick(p0: Long) {
+            imageGrab.scaleX += 0.1.toFloat()
+            imageGrab.scaleY += 0.1.toFloat()
+        }
+        override fun onFinish() {
+        }
+    }
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,11 +61,15 @@ class MainActivity : AppCompatActivity() {
         isPaused = false
         isRunning = false
         buttonStartStop.text = "start"
+        destructTimer.cancel()
+        imageGrab.scaleX = 1.0f
+        imageGrab.scaleY = 1.0f
         imageGrab.visibility = View.GONE
     }
 
     private fun timerStartStop() {
         if(!isRunning){
+            destructTimer.start()
             if(isPaused){
                 stopwatch.setBase((stopwatch.getBase() + SystemClock.elapsedRealtime() - pausedTime).toLong())
                 stopwatch.start()
@@ -70,7 +82,6 @@ class MainActivity : AppCompatActivity() {
                 buttonStartStop.text = "stop"
                 isRunning = true
                 imageGrab.visibility = View.VISIBLE
-                imageGrabApproach()
 
             }
         }else{
@@ -79,20 +90,8 @@ class MainActivity : AppCompatActivity() {
             pausedTime = SystemClock.elapsedRealtime().toDouble()
             isRunning = false
             isPaused = true
+            destructTimer.cancel()
         }
-    }
-
-    private fun imageGrabApproach() {
-        val destructTimer = object  :CountDownTimer (100000000, 100) {
-            override fun onTick(p0: Long) {
-                imageGrab.scaleX += 0.1.toFloat()
-                imageGrab.scaleY += 0.1.toFloat()
-            }
-            override fun onFinish() {
-
-            }
-        }
-        .start()
     }
 
     private fun wireWidgets() {
@@ -126,5 +125,18 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         Log.v(TAG, "+++ ON DESTROY +++")
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        var currentTime = SystemClock.elapsedRealtime() - stopwatch.base
+        outState.putLong("savedLong", SystemClock.elapsedRealtime() - stopwatch.base)
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        val userLong = savedInstanceState.getLong(  "savedLong", 0)
+        SystemClock.elapsedRealtime() - stopwatch.base = userLong
+
     }
 }
