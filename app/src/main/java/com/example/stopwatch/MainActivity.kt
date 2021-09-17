@@ -10,6 +10,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.Chronometer
 import android.widget.ImageView
+import java.util.*
 import kotlin.system.exitProcess
 
 class MainActivity : AppCompatActivity() {
@@ -17,7 +18,9 @@ class MainActivity : AppCompatActivity() {
     //making a classwide static constant in Kotlin
     companion object {
         //all your "static" constants go here
-        val TAG = "MainActivity" // val is for constants
+        const val TAG = "MainActivity" // val is for constants
+        const val BUNDLE_PAUSED_TIME = "paused time"
+        const val BUNDLE_BASE_TIME = "base time"
 
     }
 
@@ -25,11 +28,11 @@ class MainActivity : AppCompatActivity() {
     lateinit var buttonStartStop : Button
     lateinit var buttonReset : Button
     lateinit var imageGrab : ImageView
-    var timerStarted = false
-    var pausedTime = 0.0
+    var pausedTime = 0L
+    var baseTime = 0L
     var isRunning = false
     var isPaused = false
-    val destructTimer = object  :CountDownTimer (100000000, 100) {
+    private val destructTimer = object  :CountDownTimer (100000000, 100) {
         override fun onTick(p0: Long) {
             imageGrab.scaleX += 0.1.toFloat()
             imageGrab.scaleY += 0.1.toFloat()
@@ -46,6 +49,21 @@ class MainActivity : AppCompatActivity() {
 
         wireWidgets()
 
+        //check savedInstanceState for a value and assign if necessary
+        // ?. operator is a null-safe access of the object. Acts like an if blah != null
+        //blah!!. asserts that blah isn't null and will crash if it is
+        // in case the stuff on the left is null and can't be accessed
+        pausedTime = savedInstanceState?.getLong(BUNDLE_PAUSED_TIME) ?: 0L
+        baseTime = savedInstanceState?.getLong(BUNDLE_BASE_TIME) ?: 0L
+
+
+        if(isPaused){
+            stopwatch.base = (stopwatch.base + SystemClock.elapsedRealtime() - pausedTime)
+        }
+        stopwatch.base = baseTime
+        stopwatch.start()
+
+
         buttonStartStop.setOnClickListener {
            timerStartStop()
         }
@@ -55,8 +73,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun updateBase() {
+        if(isRunning){
+            baseTime =  stopwatch.base
+        }
+    }
+
     private fun timerReset() {
-        stopwatch.setBase(SystemClock.elapsedRealtime())
+        stopwatch.base = SystemClock.elapsedRealtime()
         stopwatch.stop()
         isPaused = false
         isRunning = false
@@ -71,13 +95,13 @@ class MainActivity : AppCompatActivity() {
         if(!isRunning){
             destructTimer.start()
             if(isPaused){
-                stopwatch.setBase((stopwatch.getBase() + SystemClock.elapsedRealtime() - pausedTime).toLong())
+                stopwatch.base = (stopwatch.base + SystemClock.elapsedRealtime() - pausedTime)
                 stopwatch.start()
                 buttonStartStop.text = "stop"
                 isRunning = true
 
             }else{
-                stopwatch.setBase(SystemClock.elapsedRealtime());
+                stopwatch.base = SystemClock.elapsedRealtime();
                 stopwatch.start()
                 buttonStartStop.text = "stop"
                 isRunning = true
@@ -87,7 +111,7 @@ class MainActivity : AppCompatActivity() {
         }else{
             stopwatch.stop()
             buttonStartStop.text = "start"
-            pausedTime = SystemClock.elapsedRealtime().toDouble()
+            pausedTime = SystemClock.elapsedRealtime()
             isRunning = false
             isPaused = true
             destructTimer.cancel()
@@ -129,14 +153,15 @@ class MainActivity : AppCompatActivity() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        var currentTime = SystemClock.elapsedRealtime() - stopwatch.base
-        outState.putLong("savedLong", SystemClock.elapsedRealtime() - stopwatch.base)
+        // a bundle lets you store key value pairs
+        //Key can be any unique text
+        updateBase()
+        outState.putLong(BUNDLE_BASE_TIME, baseTime)
+        outState.putLong(BUNDLE_PAUSED_TIME, pausedTime)
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
-        val userLong = savedInstanceState.getLong(  "savedLong", 0)
-        SystemClock.elapsedRealtime() - stopwatch.base = userLong
 
     }
 }
