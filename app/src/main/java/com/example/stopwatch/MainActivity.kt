@@ -21,25 +21,18 @@ class MainActivity : AppCompatActivity() {
         const val TAG = "MainActivity" // val is for constants
         const val BUNDLE_PAUSED_TIME = "paused time"
         const val BUNDLE_BASE_TIME = "base time"
+        const val BUNDLE_IS_RUNNING = "is running"
+        const val BUNDLE_IS_PAUSED = "is paused"
 
     }
 
     lateinit var stopwatch : Chronometer
     lateinit var buttonStartStop : Button
     lateinit var buttonReset : Button
-    lateinit var imageGrab : ImageView
     var pausedTime = 0L
     var baseTime = 0L
     var isRunning = false
     var isPaused = false
-    private val destructTimer = object  :CountDownTimer (100000000, 100) {
-        override fun onTick(p0: Long) {
-            imageGrab.scaleX += 0.1.toFloat()
-            imageGrab.scaleY += 0.1.toFloat()
-        }
-        override fun onFinish() {
-        }
-    }
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,14 +48,25 @@ class MainActivity : AppCompatActivity() {
         // in case the stuff on the left is null and can't be accessed
         pausedTime = savedInstanceState?.getLong(BUNDLE_PAUSED_TIME) ?: 0L
         baseTime = savedInstanceState?.getLong(BUNDLE_BASE_TIME) ?: 0L
+        isRunning = savedInstanceState?.getBoolean(BUNDLE_IS_RUNNING) ?: false
+        isPaused = savedInstanceState?.getBoolean(BUNDLE_IS_PAUSED) ?: false
 
 
-        if(isPaused){
-            stopwatch.base = (stopwatch.base + SystemClock.elapsedRealtime() - pausedTime)
+        Log.d(TAG, "onCreate: pause: $pausedTime base: $baseTime")
+
+        if(!isRunning){
+            if(isPaused){
+                stopwatch.base = (baseTime + SystemClock.elapsedRealtime() - pausedTime)
+            }else{
+                stopwatch.base = SystemClock.elapsedRealtime()
+                stopwatch.stop()
+            }
+        }else{
+            stopwatch.base = baseTime
+            stopwatch.start()
+            buttonStartStop.text = "stop"
         }
-        stopwatch.base = baseTime
-        stopwatch.start()
-
+        Log.d(TAG, "onCreate after logic: pause: $pausedTime base: $baseTime")
 
         buttonStartStop.setOnClickListener {
            timerStartStop()
@@ -74,9 +78,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateBase() {
-        if(isRunning){
             baseTime =  stopwatch.base
-        }
     }
 
     private fun timerReset() {
@@ -85,17 +87,12 @@ class MainActivity : AppCompatActivity() {
         isPaused = false
         isRunning = false
         buttonStartStop.text = "start"
-        destructTimer.cancel()
-        imageGrab.scaleX = 1.0f
-        imageGrab.scaleY = 1.0f
-        imageGrab.visibility = View.GONE
     }
 
     private fun timerStartStop() {
         if(!isRunning){
-            destructTimer.start()
             if(isPaused){
-                stopwatch.base = (stopwatch.base + SystemClock.elapsedRealtime() - pausedTime)
+                stopwatch.base = (baseTime + SystemClock.elapsedRealtime() - pausedTime)
                 stopwatch.start()
                 buttonStartStop.text = "stop"
                 isRunning = true
@@ -105,7 +102,6 @@ class MainActivity : AppCompatActivity() {
                 stopwatch.start()
                 buttonStartStop.text = "stop"
                 isRunning = true
-                imageGrab.visibility = View.VISIBLE
 
             }
         }else{
@@ -114,7 +110,6 @@ class MainActivity : AppCompatActivity() {
             pausedTime = SystemClock.elapsedRealtime()
             isRunning = false
             isPaused = true
-            destructTimer.cancel()
         }
     }
 
@@ -122,8 +117,6 @@ class MainActivity : AppCompatActivity() {
         stopwatch = findViewById(R.id.chronometer_main_stopwatch)
         buttonStartStop = findViewById(R.id.button_main_startStop)
         buttonReset = findViewById(R.id.button_main_reset)
-        imageGrab = findViewById(R.id.imageView_main_grab)
-        imageGrab.visibility = View.INVISIBLE
     }
 
     override fun onStart() {
@@ -158,6 +151,8 @@ class MainActivity : AppCompatActivity() {
         updateBase()
         outState.putLong(BUNDLE_BASE_TIME, baseTime)
         outState.putLong(BUNDLE_PAUSED_TIME, pausedTime)
+        outState.putBoolean(BUNDLE_IS_RUNNING, isRunning)
+        outState.putBoolean(BUNDLE_IS_PAUSED, isPaused)
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {

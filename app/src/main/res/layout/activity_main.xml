@@ -28,31 +28,18 @@
         app:layout_constraintEnd_toStartOf="@+id/button_main_reset"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView_main_grab" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/button_main_reset"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="reset"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/button_main_startStop"
-        app:layout_constraintTop_toTopOf="@+id/button_main_startStop" />
-
-    <ImageView
-        android:id="@+id/imageView_main_grab"
-        android:layout_width="37dp"
-        android:layout_height="113dp"
-        android:layout_marginBottom="32dp"
-        app:layout_constraintBottom_toTopOf="@+id/button_main_startStop"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/chronometer_main_stopwatch"
-        app:layout_constraintVertical_chainStyle="packed"
-        app:srcCompat="@drawable/maxresdefault"
-        tools:srcCompat="@drawable/maxresdefault" />
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 
